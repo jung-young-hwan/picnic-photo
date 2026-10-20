@@ -1,6 +1,9 @@
 import Foundation
 import Observation
+import OSLog
 import UIKit
+
+let indexLog = Logger(subsystem: "com.jungyounghwan.picnic", category: "indexer")
 
 /// 라이브러리 동기화 → 사진 분석 → 지명 변환을 차례로 진행한다.
 /// 앱이 화면에 있는 동안만 돌고, 다시 켜면 이어서 한다.
@@ -102,10 +105,13 @@ final class Indexer {
         repeat {
             needsResync = false
             phase = .syncing
+            indexLog.notice("sync start")
             await sync()
+            indexLog.notice("sync done")
             if Task.isCancelled { return }
             phase = .measuring
             await measureFileSizes()
+            indexLog.notice("measure done")
             if Task.isCancelled { return }
             phase = .analyzing
             await analyzeAll()
@@ -135,7 +141,15 @@ final class Indexer {
         while !Task.isCancelled {
             let done = await Task.detached(priority: .utility) { () -> Bool in
                 guard let ids = try? store.idsMissingFileSize(limit: 300), !ids.isEmpty else { return true }
-                try? store.saveFileSizes(library.fileSizes(ids: ids))
+                indexLog.notice("measure batch \(ids.count)")
+                let sizes = library.fileSizes(ids: ids)
+                indexLog.notice("measured \(sizes.count) total \(sizes.values.reduce(0, +))")
+                do {
+                    try store.saveFileSizes(sizes)
+                } catch {
+                    indexLog.error("save sizes failed \(String(describing: error), privacy: .public)")
+                    return true
+                }
                 return false
             }.value
             if done { break }
@@ -168,6 +182,7 @@ final class Indexer {
                 }
             }
             refreshProgress()
+            indexLog.notice("analyzed \(self.progress.analyzed) / \(self.progress.total)")
             batches += 1
             if batches % 5 == 0 { revision += 1 }
         }

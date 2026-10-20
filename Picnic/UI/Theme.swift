@@ -123,6 +123,7 @@ struct PillButtonStyle: ButtonStyle {
 
 enum Format {
     static func bytes(_ value: Int64) -> String {
+        if value <= 0 { return "0MB" }
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         formatter.allowedUnits = [.useKB, .useMB, .useGB]

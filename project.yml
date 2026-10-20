@@ -26,6 +26,8 @@ targets:
       path: Picnic/Info.plist
       properties:
         CFBundleDisplayName: 피크닉
+        CFBundleDevelopmentRegion: ko
+        CFBundleLocalizations: [ko]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
