@@ -36,13 +36,17 @@ final class CleanupServiceTests: XCTestCase {
     }
 
     func testDocumentsNeedUtilityAndText() async throws {
-        try store.upsertMetadata([makeMeta("receipt"), makeMeta("sign"), makeMeta("label-doc")])
+        try store.upsertMetadata([
+            makeMeta("receipt"), makeMeta("sign"), makeMeta("label-doc"), makeMeta("menu"), makeMeta("plain"),
+        ])
         try store.saveAnalysis(id: "receipt", result: makeResult(ocr: String(repeating: "가", count: 40), utility: true), version: 1)
         try store.saveAnalysis(id: "sign", result: makeResult(ocr: String(repeating: "가", count: 40), utility: false), version: 1)
-        try store.saveAnalysis(id: "label-doc", result: makeResult(labels: ["receipt"], utility: true), version: 1)
+        try store.saveAnalysis(id: "label-doc", result: makeResult(labels: ["receipt"], utility: nil), version: 1)
+        try store.saveAnalysis(id: "menu", result: makeResult(ocr: String(repeating: "가", count: 90), utility: nil), version: 1)
+        try store.saveAnalysis(id: "plain", result: makeResult(labels: ["dog"], utility: true), version: 1)
 
         let result = try await service.candidates(.document)
-        XCTAssertEqual(Set(result.items.map(\.id)), ["receipt", "label-doc"])
+        XCTAssertEqual(Set(result.items.map(\.id)), ["receipt", "label-doc", "menu"])
         XCTAssertEqual(result.defaultSelected, [])
     }
 

@@ -200,6 +200,7 @@ final class Indexer {
         do {
             let result = try analyzer.analyze(image)
             try store.saveAnalysis(id: id, result: result, version: version)
+            indexLog.debug("labels \(result.labels.count) text \(result.ocrText?.count ?? 0) utility \(String(describing: result.isUtility))")
         } catch {
             try? store.markAnalysisFailed(id: id)
         }

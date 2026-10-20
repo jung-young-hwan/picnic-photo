@@ -7,8 +7,7 @@ struct SelectionToolbar<Extra: View>: View {
     @ViewBuilder var extra: () -> Extra
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+        FlowLayout(spacing: 8) {
                 Button {
                     selection.selectAll(ids)
                 } label: {
@@ -26,8 +25,6 @@ struct SelectionToolbar<Extra: View>: View {
                 .disabled(selection.count == 0)
 
                 extra()
-            }
-            .padding(.vertical, 2)
         }
     }
 }

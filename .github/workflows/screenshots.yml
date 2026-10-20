@@ -62,6 +62,8 @@ jobs:
           run -PicnicInitialTab 2; shot 100 02-settings
           run -PicnicInitialTab 0; shot 8 03-search
           run -PicnicInitialTab 0 -PicnicDemoQuery picnic; shot 8 04-search-results
+          run -PicnicInitialTab 0 -PicnicDemoQuery 하늘; shot 8 04b-search-sky
+          run -PicnicInitialTab 1 -PicnicDemoCategory document; shot 10 07b-document
           run -PicnicInitialTab 1; shot 10 05-cleanup
           run -PicnicInitialTab 1 -PicnicDemoCategory similar; shot 20 06-similar
           run -PicnicInitialTab 1 -PicnicDemoCategory blurry; shot 10 07-blurry
@@ -70,7 +72,7 @@ jobs:
           run -PicnicInitialTab 1; shot 10 08-cleanup-dark
           run -PicnicInitialTab 0; shot 8 09-search-dark
 
-          xcrun simctl spawn "$UDID" log show --last 30m --style compact             --predicate 'subsystem == "com.jungyounghwan.picnic"' > shots/app-log.txt || true
+          xcrun simctl spawn "$UDID" log show --last 30m --style compact             --info --debug --predicate 'subsystem == "com.jungyounghwan.picnic"' > shots/app-log.txt || true
 
       - name: Upload
         if: always()

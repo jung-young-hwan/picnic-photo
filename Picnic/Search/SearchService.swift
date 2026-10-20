@@ -79,9 +79,20 @@ final class SearchService: Sendable {
     func suggestions(limit: Int = 8) throws -> [String] {
         let labels = try store.topLabels(limit: limit * 3).compactMap { lexicon.korean(for: $0) }
         let places = try store.topPlaces(limit: limit / 2)
+        // 사물 → 지역 → 사물 … 번갈아 섞는다
+        var mixed: [String] = []
+        var labelIterator = labels.makeIterator()
+        var placeIterator = places.makeIterator()
+        while mixed.count < limit * 2 {
+            let a = labelIterator.next()
+            let b = labelIterator.next()
+            let c = placeIterator.next()
+            if a == nil && b == nil && c == nil { break }
+            mixed += [a, b, c].compactMap { $0 }
+        }
         var seen: Set<String> = []
         var result: [String] = []
-        for word in places + labels where seen.insert(word).inserted {
+        for word in mixed where seen.insert(word).inserted {
             result.append(word)
             if result.count == limit { break }
         }

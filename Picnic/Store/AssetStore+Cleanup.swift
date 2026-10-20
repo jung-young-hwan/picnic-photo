@@ -34,15 +34,17 @@ extension AssetStore {
         try fetchSummaries(where: "isScreenshot = 1", arguments: [], order: "createdAt DESC")
     }
 
-    func documentSummaries(minTextLength: Int = 30) throws -> [AssetSummary] {
+    /// 영수증·문서: 문서 라벨이 붙었거나, 글자가 아주 많거나, 애플이 '유틸리티 이미지'로 본 사진 중 글자가 있는 것.
+    func documentSummaries(minTextLength: Int = 30, heavyTextLength: Int = 80) throws -> [AssetSummary] {
         let labels = Self.documentLabels.map { "'\($0)'" }.joined(separator: ",")
         return try fetchSummaries(
             where: """
-                mediaType = 1 AND isScreenshot = 0 AND isUtility = 1
-                  AND (textLength >= ? OR id IN (
-                        SELECT assetId FROM label WHERE keyword IN (\(labels)) AND confidence >= 0.5))
+                mediaType = 1 AND isScreenshot = 0
+                  AND (id IN (SELECT assetId FROM label WHERE keyword IN (\(labels)) AND confidence >= 0.5)
+                       OR textLength >= ?
+                       OR (isUtility = 1 AND textLength >= ?))
                 """,
-            arguments: [minTextLength], order: "createdAt DESC")
+            arguments: [heavyTextLength, minTextLength], order: "createdAt DESC")
     }
 
     func largeVideoSummaries(minBytes: Int64) throws -> [AssetSummary] {
