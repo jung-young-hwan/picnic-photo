@@ -4,11 +4,12 @@ struct CleanupHomeScreen: View {
     @Environment(AppModel.self) private var app
     @State private var overview: [CleanupCategory: CleanupResult] = [:]
     @State private var loading = true
+    @State private var path: [CleanupCategory] = DemoHooks.category.map { [$0] } ?? []
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 4) {

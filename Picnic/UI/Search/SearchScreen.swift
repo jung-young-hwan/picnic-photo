@@ -32,6 +32,9 @@ struct SearchScreen: View {
             PhotoViewer(request: request, selection: isSelecting ? selection : nil)
         }
         .task(id: app.indexer.revision) { await loadSuggestions() }
+        .onAppear {
+            if query.isEmpty, let demo = DemoHooks.query { query = demo }
+        }
         .task(id: query) {
             // 입력을 잠깐 멈추면 검색한다
             try? await Task.sleep(for: .milliseconds(350))

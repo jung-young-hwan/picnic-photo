@@ -1,0 +1,67 @@
+name: screenshots
+
+on:
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          brew install xcodegen
+          python3 -m pip install --break-system-packages pillow
+
+      - name: Build for simulator
+        run: |
+          xcodegen generate
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys
+          d=json.load(sys.stdin)["devices"]
+          c=[x for k,v in d.items() if "iOS" in k for x in v if x["name"].startswith("iPhone")]
+          print(c[-1]["udid"])')
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcodebuild build -project Picnic.xcodeproj -scheme Picnic \
+            -destination "id=$UDID" -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO -quiet
+
+      - name: Prepare simulator
+        run: |
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+          python3 tools/make_demo_photos.py demo
+          xcrun simctl addmedia "$UDID" demo/*.jpg
+          xcrun simctl install "$UDID" build/dd/Build/Products/Debug-iphonesimulator/Picnic.app
+          mkdir -p shots
+
+      - name: Capture
+        run: |
+          APP=com.jungyounghwan.picnic
+          shot() { sleep "$1"; xcrun simctl io "$UDID" screenshot "shots/$2.png"; }
+          run() { xcrun simctl terminate "$UDID" $APP 2>/dev/null || true; xcrun simctl launch "$UDID" $APP "$@" >/dev/null; }
+
+          xcrun simctl ui "$UDID" appearance light
+          run; shot 5 01-welcome
+
+          xcrun simctl privacy "$UDID" grant photos $APP
+          run -PicnicInitialTab 2; shot 100 02-settings
+          run -PicnicInitialTab 0; shot 8 03-search
+          run -PicnicInitialTab 0 -PicnicDemoQuery picnic; shot 8 04-search-results
+          run -PicnicInitialTab 1; shot 10 05-cleanup
+          run -PicnicInitialTab 1 -PicnicDemoCategory similar; shot 20 06-similar
+          run -PicnicInitialTab 1 -PicnicDemoCategory blurry; shot 10 07-blurry
+
+          xcrun simctl ui "$UDID" appearance dark
+          run -PicnicInitialTab 1; shot 10 08-cleanup-dark
+          run -PicnicInitialTab 0; shot 8 09-search-dark
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots

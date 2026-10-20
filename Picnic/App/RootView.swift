@@ -28,15 +28,17 @@ struct RootView: View {
 }
 
 struct MainTabView: View {
+    @State private var tab = DemoHooks.initialTab
+
     var body: some View {
-        TabView {
-            Tab("검색", systemImage: "magnifyingglass") {
+        TabView(selection: $tab) {
+            Tab("검색", systemImage: "magnifyingglass", value: 0) {
                 SearchScreen()
             }
-            Tab("정리", systemImage: "sparkles") {
+            Tab("정리", systemImage: "sparkles", value: 1) {
                 CleanupHomeScreen()
             }
-            Tab("설정", systemImage: "gearshape.fill") {
+            Tab("설정", systemImage: "gearshape.fill", value: 2) {
                 SettingsScreen()
             }
         }

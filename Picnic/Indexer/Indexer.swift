@@ -123,7 +123,7 @@ final class Indexer {
             for start in stride(from: 0, to: metadata.count, by: 1000) {
                 try? store.upsertMetadata(Array(metadata[start..<min(start + 1000, metadata.count)]))
             }
-            try? store.removeAssets(notIn: Set(metadata.map(\.id)))
+            _ = try? store.removeAssets(notIn: Set(metadata.map(\.id)))
         }.value
         refreshProgress()
         revision += 1
