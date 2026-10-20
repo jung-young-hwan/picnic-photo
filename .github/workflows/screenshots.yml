@@ -26,7 +26,9 @@ jobs:
           echo "UDID=$UDID" >> "$GITHUB_ENV"
           xcodebuild build -project Picnic.xcodeproj -scheme Picnic \
             -destination "id=$UDID" -derivedDataPath build/dd \
-            CODE_SIGN_IDENTITY=- -quiet
+            CODE_SIGN_IDENTITY=- 2>&1 | grep -E "error|warning: .*sign|Signing|RegisterExecutionPolicy|\*\*" | tail -n 40
+          ls -la build/dd/Build/Products/Debug-iphonesimulator/
+          ls build/dd/Build/Products/
 
       - name: Prepare simulator
         run: |
