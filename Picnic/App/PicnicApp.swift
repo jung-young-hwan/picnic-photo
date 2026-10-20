@@ -2,9 +2,13 @@ import SwiftUI
 
 @main
 struct PicnicApp: App {
+    @State private var app = AppModel()
+
     var body: some Scene {
         WindowGroup {
-            Text("피크닉")
+            RootView()
+                .environment(app)
+                .fontDesign(.rounded)
         }
     }
 }
