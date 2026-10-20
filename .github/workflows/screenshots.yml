@@ -24,7 +24,7 @@ jobs:
           c=[x for k,v in d.items() if "iOS" in k for x in v if x["name"].startswith("iPhone")]
           print(c[-1]["udid"])')
           echo "UDID=$UDID" >> "$GITHUB_ENV"
-          xcodebuild build -project Picnic.xcodeproj -scheme Picnic \
+          xcodebuild build-for-testing -project Picnic.xcodeproj -scheme PicnicUITests \
             -destination "id=$UDID" -derivedDataPath build/dd \
             CODE_SIGN_IDENTITY=- 2>&1 | grep -E "error|warning: .*sign|Signing|RegisterExecutionPolicy|\*\*" | tail -n 40
           ls -la build/dd/Build/Products/Debug-iphonesimulator/
