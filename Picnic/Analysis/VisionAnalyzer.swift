@@ -1,5 +1,8 @@
 import CoreGraphics
+import OSLog
 import Vision
+
+let analysisLog = Logger(subsystem: "com.jungyounghwan.picnic", category: "analysis")
 
 /// Vision 으로 사진 1장을 분석한다. 모든 처리는 기기 안에서 이뤄진다.
 struct VisionAnalyzer: Sendable {
@@ -20,11 +23,18 @@ struct VisionAnalyzer: Sendable {
         quickText.usesLanguageCorrection = false
         try handler.perform([classify, quickText])
 
-        let labels = (classify.results ?? [])
-            .filter { $0.confidence >= minLabelConfidence }
+        let observations = classify.results ?? []
+        let labels = observations
+            .filter { $0.confidence >= minLabelConfidence && $0.hasMinimumRecall(0.01, forPrecision: 0.8) }
             .sorted { $0.confidence > $1.confidence }
             .prefix(labelLimit)
             .map { LabelScore(keyword: $0.identifier, confidence: Double($0.confidence)) }
+        #if DEBUG
+        let top = observations.sorted { $0.confidence > $1.confidence }.prefix(6)
+            .map { "\($0.identifier)=\(String(format: "%.2f", $0.confidence))\($0.hasMinimumRecall(0.01, forPrecision: 0.8) ? "*" : "")" }
+            .joined(separator: " ")
+        analysisLog.notice("classify \(observations.count) kept \(labels.count): \(top, privacy: .public)")
+        #endif
 
         // 글자가 있을 때만 한국어 정밀 인식을 한다 (느리기 때문)
         var ocrText: String?
