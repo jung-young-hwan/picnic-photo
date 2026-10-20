@@ -1,0 +1,65 @@
+name: Picnic
+options:
+  bundleIdPrefix: com.jungyounghwan
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 7.0.0
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+targets:
+  Picnic:
+    type: application
+    platform: iOS
+    sources:
+      - path: Picnic
+    dependencies:
+      - package: GRDB
+    info:
+      path: Picnic/Info.plist
+      properties:
+        CFBundleDisplayName: 피크닉
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        ITSAppUsesNonExemptEncryption: false
+        NSPhotoLibraryUsageDescription: 사진을 기기 안에서 분석해 한국어 검색과 정리 기능을 제공해요. 사진은 기기 밖으로 나가지 않아요.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jungyounghwan.picnic
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: YES
+  PicnicTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PicnicTests
+    dependencies:
+      - target: Picnic
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Picnic.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Picnic
+        BUNDLE_LOADER: $(TEST_HOST)
+schemes:
+  Picnic:
+    build:
+      targets:
+        Picnic: all
+        PicnicTests: [test]
+    test:
+      targets:
+        - PicnicTests
