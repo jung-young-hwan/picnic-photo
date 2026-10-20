@@ -38,16 +38,24 @@ jobs:
           xcrun simctl install "$UDID" build/dd/Build/Products/Debug-iphonesimulator/Picnic.app
           mkdir -p shots
 
+      - name: Welcome screen
+        run: |
+          xcrun simctl ui "$UDID" appearance light
+          xcrun simctl launch "$UDID" com.jungyounghwan.picnic >/dev/null
+          sleep 6
+          xcrun simctl io "$UDID" screenshot shots/01-welcome.png
+          xcrun simctl terminate "$UDID" com.jungyounghwan.picnic || true
+
+      - name: Grant photo access (UI test)
+        run: |
+          xcodebuild test-without-building -project Picnic.xcodeproj -scheme PicnicUITests             -destination "id=$UDID" -derivedDataPath build/dd CODE_SIGNING_ALLOWED=NO 2>&1 | tail -n 25
+
       - name: Capture
         run: |
           APP=com.jungyounghwan.picnic
           shot() { sleep "$1"; xcrun simctl io "$UDID" screenshot "shots/$2.png"; }
           run() { xcrun simctl terminate "$UDID" $APP 2>/dev/null || true; xcrun simctl launch "$UDID" $APP "$@" >/dev/null; }
 
-          xcrun simctl ui "$UDID" appearance light
-          run; shot 5 01-welcome
-
-          xcrun simctl privacy "$UDID" grant photos $APP
           run -PicnicInitialTab 2; shot 100 02-settings
           run -PicnicInitialTab 0; shot 8 03-search
           run -PicnicInitialTab 0 -PicnicDemoQuery picnic; shot 8 04-search-results

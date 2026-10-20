@@ -52,19 +52,21 @@ struct WelcomeScreen: View {
     @State private var appear = false
 
     var body: some View {
-        VStack(spacing: 28) {
-            Spacer()
+        VStack(spacing: 20) {
+            Spacer(minLength: 8)
             illustration
                 .scaleEffect(appear ? 1 : 0.85)
                 .opacity(appear ? 1 : 0)
             VStack(spacing: 10) {
                 Text("사진 정리,\n이제 가볍게")
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .font(.system(size: 30, weight: .heavy, design: .rounded))
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Color.ink)
                 Text("피크닉이 사진을 살펴보고\n찾기 쉽게, 비우기 쉽게 도와드려요")
                     .font(.rounded(.body))
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Color.inkSoft)
             }
             VStack(alignment: .leading, spacing: 14) {
@@ -72,9 +74,9 @@ struct WelcomeScreen: View {
                 feature("sparkles", .lavender, "흐리고 비슷한 사진 정리", "지울 만한 사진을 골라 모아 드려요")
                 feature("lock.fill", .sage, "사진은 기기 안에만", "분석은 모두 아이폰 안에서 해요")
             }
-            .card(padding: 20, radius: 24)
+            .card(padding: 18, radius: 24)
             .padding(.horizontal, 24)
-            Spacer()
+            Spacer(minLength: 8)
             Button {
                 Task { await app.requestAccess() }
             } label: {
@@ -123,7 +125,8 @@ struct WelcomeScreen: View {
                 .foregroundStyle(Color.rose)
                 .offset(x: -72, y: 64)
         }
-        .frame(height: 170)
+        .scaleEffect(0.85)
+        .frame(height: 150)
     }
 
     private func feature(_ symbol: String, _ tint: Color, _ title: String, _ detail: String) -> some View {
