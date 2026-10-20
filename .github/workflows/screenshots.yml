@@ -51,7 +51,7 @@ jobs:
       - name: Grant photo access (UI test)
         run: |
           set -o pipefail
-          xcodebuild test-without-building -project Picnic.xcodeproj -scheme PicnicUITests -destination "id=$UDID" -derivedDataPath build/dd CODE_SIGN_IDENTITY=- 2>&1 | tail -n 25
+          xcodebuild test-without-building -project Picnic.xcodeproj -scheme PicnicUITests -destination "id=$UDID" -derivedDataPath build/dd CODE_SIGN_IDENTITY=- 2>&1 | grep -E "PICNIC_DEBUG|error|t = |Executed" | head -n 120
 
       - name: Capture
         run: |
